@@ -1,17 +1,9 @@
-variable "ami_value" {
-    description = "Value for ami"
-}
-
-variable "instance_type_value" {
-    description = "Value  for instance type"
-}
-
-
 provider "aws" {
     region = "us-east-1"
 }
 
-resource "aws_instance" "example" {
-    ami           = "var.ami_value"
-    instance_type = "var.instance_type_value"
+module "ec2_instance" {
+    source = "./module/ec2"
+    ami_value = "ami-0ad50334604831820"
+    instance_type_value = "t3.small"
 }
