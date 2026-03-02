@@ -1,3 +1,8 @@
 KubesimplifyProject/
 KubesimplifyProjectCodes/
 EC2_Instance/EC2_Instance/terraform.tfvars
+# Terraform state
+*.tfstate
+*.tfstate.*
+.terraform/
+terraform.tfvars
