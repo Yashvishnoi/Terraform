@@ -60,6 +60,7 @@ resource "aws_security_group" "websg" {
     name = web
     vpc_id = aws_vpc.myvpc.id
 
+    # HTTP Traffic from anywhere.
     ingress {
         description = "HTTP from VPC"
         from_port = 80
@@ -67,7 +68,7 @@ resource "aws_security_group" "websg" {
         protocol = "tcp"
         cidr_blocks = ["0.0.0.0/0"]
     }
-    
+    # SSH from Anywhere 
     ingress {
         description = "SSH"
         from_port = 22
@@ -75,7 +76,7 @@ resource "aws_security_group" "websg" {
         protocol = "tcp"
         cidr_blocks = ["0.0.0.0/0"]
     }
-
+    # This allows all outbound traffic, Instances can access the internet
     egress {
         from_port = 0
         to_port = 0
@@ -87,6 +88,38 @@ resource "aws_security_group" "websg" {
       name = "Web-sg"
     }
 }
+
+resource "aws_instance" "server" {
+    ami = "ami-0b6c6ebed2801a5cb"
+    instance_type = "t3.micro"
+    key_name = "aws_key_pair.example.key_name"
+    vpc_security_group_ids = [aws_security_group.websg.id]
+    subnet_id = "aws_subnet.sub1.id"
+
+    connection {
+        type = "ssh"
+        user = "ubuntu"
+        private_key = file("~/.ssh/id_rsa")
+        host = self.public_ip
+    }
+
+    # File provisioner to copy a file from local to remote EC2 instance
+    provisioner "file" {
+        source = "app.py"
+        destination = "/home/ubuntu/aap.py"
+    }
+    provisioner "remote-exec" {
+        inline = [
+            "echo 'Hello from remote instance'",
+            "sudo apt update -y",
+            "sudo apt-get install -y pyhton python3-pip",
+            "cd /home/ubuntu",
+            "sudo pip3 install flask",
+            "sudo python3 app.py"
+        ]
+    }
+}
+
 
 
 
