@@ -1,5 +1,5 @@
 provider "aws" {
-    region = "us-east-1"
+    region = "us-east-1a"
 }
 
 # Variable definition
@@ -41,7 +41,7 @@ resource "aws_internet_gateway" "igw" {
 resource "aws_route_table" "RT" {
     vpc_id = aws_vpc.myvpc.id
 
-    route = {
+    route {
         cidr_block = "0.0.0.0/0"
         gateway_id = aws_internet_gateway.igw.id
     }
@@ -57,7 +57,7 @@ resource "aws_route_table_association" "rta1" {
 # Create Security Group
 
 resource "aws_security_group" "websg" {
-    name = web
+    name = "web"
     vpc_id = aws_vpc.myvpc.id
 
     # HTTP Traffic from anywhere.
@@ -85,16 +85,16 @@ resource "aws_security_group" "websg" {
     }
 
     tags = {
-      name = "Web-sg"
+      Name = "Web-sg"
     }
 }
 
 resource "aws_instance" "server" {
     ami = "ami-0b6c6ebed2801a5cb"
     instance_type = "t3.micro"
-    key_name = "aws_key_pair.example.key_name"
+    key_name = aws_key_pair.example.key_name
     vpc_security_group_ids = [aws_security_group.websg.id]
-    subnet_id = "aws_subnet.sub1.id"
+    subnet_id = aws_subnet.sub1.id
 
     connection {
         type = "ssh"
@@ -106,13 +106,13 @@ resource "aws_instance" "server" {
     # File provisioner to copy a file from local to remote EC2 instance
     provisioner "file" {
         source = "app.py"
-        destination = "/home/ubuntu/aap.py"
+        destination = "/home/ubuntu/app.py"
     }
     provisioner "remote-exec" {
         inline = [
             "echo 'Hello from remote instance'",
             "sudo apt update -y",
-            "sudo apt-get install -y pyhton python3-pip",
+            "sudo apt-get install -y python3 python3-pip",
             "cd /home/ubuntu",
             "sudo pip3 install flask",
             "sudo python3 app.py"
