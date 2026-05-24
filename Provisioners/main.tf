@@ -1,5 +1,5 @@
 provider "aws" {
-    region = "us-east-1a"
+    region = "us-east-1"
 }
 
 # Variable definition
@@ -12,7 +12,7 @@ variable "cidr" {
 
 resource "aws_key_pair" "example" {
     key_name = "terraform-demo-yash"
-    public_key = file("~/.ssh/id_rsa.pub")
+    public_key = file(pathexpand("~/.ssh/id_ed25519.pub"))
 }
 
 # Create VPC
@@ -26,7 +26,7 @@ resource "aws_vpc" "myvpc" {
 resource "aws_subnet" "sub1" {
     vpc_id = aws_vpc.myvpc.id
     cidr_block = "10.0.0.0/24"
-    availability_zone = "us-east-1"
+    availability_zone = "us-east-1a"
     map_public_ip_on_launch = true
 }
 
@@ -99,7 +99,7 @@ resource "aws_instance" "server" {
     connection {
         type = "ssh"
         user = "ubuntu"
-        private_key = file("~/.ssh/id_rsa")
+        private_key = file(pathexpand("~/.ssh/id_ed25519"))
         host = self.public_ip
     }
 
@@ -110,12 +110,11 @@ resource "aws_instance" "server" {
     }
     provisioner "remote-exec" {
         inline = [
-            "echo 'Hello from remote instance'",
-            "sudo apt update -y",
-            "sudo apt-get install -y python3 python3-pip",
-            "cd /home/ubuntu",
-            "sudo pip3 install flask",
-            "sudo python3 app.py"
+		"echo 'Hello from remote instance'",
+		"sudo apt update",
+  		"sudo apt install python3-pip -y",
+  		"sudo apt install python3-flask -y",
+    		"sudo nohup python3 /home/ubuntu/app.py > output.log 2>&1 &"
         ]
     }
 }
