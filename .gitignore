@@ -6,3 +6,4 @@ EC2_Instance/EC2_Instance/terraform.tfvars
 *.tfstate.*
 .terraform/
 terraform.tfvars
+.DS_Store
